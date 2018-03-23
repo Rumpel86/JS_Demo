@@ -34,6 +34,7 @@
 }
 #savedTimes {
   font-size: 25px;
+  color: dimgrey;
   font-weight: bold;
   padding-left: 10px;
   padding-top: 10px;
@@ -118,25 +119,16 @@ let board = Vue.component("savedTimes", {
   }
 });
 
-let itemsSavedTime = [ {
-  time: getFormattedTime(0),
-  id: 0
-},
- {
-  time: getFormattedTime(11.123),
-  id: 1
-}, {
-  time: getFormattedTime(22.111),
-  id: 2
-}];
+let itemsSavedTime = [];
 
-let itemSavedTime = {
-  time: getFormattedTime(0),
-  id: 0
-};
-
-
-function saveTime(obj, e) {}
+function saveTime(obj, e) {
+  obj.stopwatch = obj.additionaTime + (new Date() - obj.startTime) / 1000;
+  let itemSavedTime = {
+    time: getFormattedTime(obj.stopwatch),
+    id: obj.itemsSavedTime.length+1
+  };
+  obj.itemsSavedTime.push(itemSavedTime);
+}
 
 function clearStopWatch(obj, e) {
   clearTimeout(obj.timerId);
