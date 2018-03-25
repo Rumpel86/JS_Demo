@@ -1,13 +1,13 @@
 <template>
   <main-layout>
     <div class="container-stopwatch">
-      <div id="stopwatch">{{ formattedTime }}
-        <savedTimes id="savedTimes"></savedTimes>
-      </div>
-      <div id="stopwatch">
+     <div id="stopwatch">
         <input v-bind:value=buttonRunName id="button-run" type="button" class="myButton" v-on:click="start($event)">
         <input type="button" value="Не готово! Помедленее, я запыссую..." class="myButton" v-on:click="saveTime($event)" id="saveTimeBtn">
         <input type="button" value="Ша, уже никто никуда не спешит!" class="myButton" v-on:click="restart($event)" id="restartBtn">
+      </div>
+      <div id="stopwatch">{{ formattedTime }}
+        <savedTimes id="savedTimes"></savedTimes>
       </div>
     </div>
   </main-layout>
@@ -26,6 +26,13 @@
   margin-right: auto;
 }
 #stopwatch {
+  font-size: 45px;
+  font-weight: bold;
+  padding-left: 10px;
+  padding-top: 10px;
+  display: inline-block;
+}
+#horizontal-location {
   font-size: 45px;
   font-weight: bold;
   padding-left: 10px;
@@ -109,14 +116,29 @@ export default {
 
 let board = Vue.component("savedTimes", {
   template: `
-    <div>
+    <div class="horizontal-location">
       <div v-for="item in data.itemsSavedTime" :key="item.id">
         {{ item.time }}
+        <button v-bind:itemId=item.id  v-on:click="dellSavedTime($event, item.id)">УДАЛИТЬ!</button>
       </div>
     </div>`,
   data: function() {
     return { data };
-  }
+  },
+  methods: {
+    dellSavedTime: function(event, id) {
+
+      this.data.itemsSavedTime = this.data.itemsSavedTime.filter((el) => {
+        return el.id != id;
+      });
+    }
+  },
+  props: {
+    itemId: {
+      type: Number,
+      default: 0
+    }
+  },
 });
 
 let data = { itemsSavedTime: [] };
