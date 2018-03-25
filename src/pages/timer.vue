@@ -88,7 +88,7 @@ export default {
       timerId: 0,
       interval: 133,
       buttonRunName: "Ну что, понеслись!",
-      itemsSavedTime
+      data
     };
   },
   components: {
@@ -110,24 +110,27 @@ export default {
 let board = Vue.component("savedTimes", {
   template: `
     <div>
-      <div v-for="item in itemsSavedTime" :key="item.id">
+      <div v-for="item in data.itemsSavedTime" :key="item.id">
         {{ item.time }}
       </div>
     </div>`,
   data: function() {
-    return { itemsSavedTime };
+    return { data };
   }
 });
 
-let itemsSavedTime = [];
+let data = { itemsSavedTime: [] };
 
 function saveTime(obj, e) {
-  obj.stopwatch = obj.additionaTime + (new Date() - obj.startTime) / 1000;
+  if (!!obj.timerId) {
+    obj.stopwatch = obj.additionaTime + (new Date() - obj.startTime) / 1000;
+  }
+
   let itemSavedTime = {
     time: getFormattedTime(obj.stopwatch),
-    id: obj.itemsSavedTime.length+1
+    id: obj.data.itemsSavedTime.length + 1
   };
-  obj.itemsSavedTime.push(itemSavedTime);
+  obj.data.itemsSavedTime.push(itemSavedTime);
 }
 
 function clearStopWatch(obj, e) {
@@ -137,6 +140,7 @@ function clearStopWatch(obj, e) {
   obj.startTime = 0;
   obj.timerId = 0;
   obj.buttonRunName = "Ну что, понеслись!";
+  obj.data.itemsSavedTime = [];
 }
 
 function startStopWatch(obj, e) {
