@@ -1,14 +1,29 @@
 <template>
   <main-layout>
-    <div class="container-stopwatch">
+    <h2>ВНИМАНИЕ, ДОБАВЛЕНА ВОЗМОЖНОСТЬ УПРАВЛЕНИЯ ЖЕСТАМИ!</h2>
+    <p>Жесты должны быть четкими, сложный анализ погрешности не вводил</p>
+    <p>Жест "Вниз-Вверх": старт или стоп</p>
+    <p>Жест "Вправо-Влево": сохранить время</p>
+    <p>Жест "Вниз0=-Влево": обнулить</p>
+    <div class="container-stopwatch"  
+    v-on:mousedown.left="eventMouseDown($event)"
+    v-on:mouseup.left="eventMouseUp($event)"
+    v-on:mousemove="eventMouseMove($event)"
+    >
      <div id="stopwatch">
         <input v-bind:value=buttonRunName id="button-run" type="button" class="myButton" v-on:click="start($event)">
-        <input type="button" value="Не готово! Помедленее, я запыссую..." class="myButton" v-on:click="saveTime($event)" id="saveTimeBtn">
-        <input type="button" value="Ша, уже никто никуда не спешит!" class="myButton" v-on:click="restart($event)" id="restartBtn">
+        <input type="button" value="Сохранить время" class="myButton" v-on:click="saveTime($event)" id="saveTimeBtn">
+        <input type="button" value="Обнулить" class="myButton" v-on:click="restart($event)" id="restartBtn">
       </div>
       <div id="stopwatch">{{ formattedTime }}
         <savedTimes id="savedTimes"></savedTimes>
       </div>
+      <div id="stopwatch111">r:{{ route }}</div>
+      <div id="stopwatch111">rX: {{ routeX }}</div>
+      <div id="stopwatch111">rY: {{ routeY }}</div>
+      <div id="stopwatch111">dX: {{ deltaX }}</div>
+      <div id="stopwatch111">dY: {{ deltaY }}</div>
+      <div id="stopwatch111">route: {{ routeP }}</div>
     </div>
   </main-layout>
 </template>
@@ -94,7 +109,20 @@ export default {
       additionaTime: 0,
       timerId: 0,
       interval: 133,
-      buttonRunName: "Ну что, понеслись!",
+      route: 133,
+      routeX: 133,
+      routeY: 133,
+      deltaX: 133,
+      deltaY: 133,
+      wayFuncs,
+      routeP: "",
+      buttonRunName: "СТАРТ",
+      mouseDown: {
+        down: false,
+        event: undefined,
+        func: [],
+        preFunc: []
+      },
       data
     };
   },
@@ -110,6 +138,99 @@ export default {
     },
     saveTime: function(event) {
       saveTime(this, event);
+    },
+    eventMouseDown: function(event) {
+      this.mouseDown.down = true;
+      this.mouseDown.event = event;
+    },
+    eventMouseMove: function(event) {
+      function determinateRouting(delta, limit, limitError) {
+        let route = undefined;
+        let a = Math.round(Math.abs(delta) / limit * 10) / 10;
+        if (a > 1 - limitError) route = delta < 0 ? -1 : 1;
+        else if (a > -limitError && a < limitError) route = 0;
+        return route;
+      }
+
+      if (event.buttons === 1) {
+        event.preventDefault();
+        let limit = 20;
+        let limitError = 0.25;
+        let maxCount = 2;
+
+        let deltaX = this.mouseDown.event.screenX - event.screenX;
+        let deltaY = this.mouseDown.event.screenY - event.screenY;
+        let routeX = determinateRouting(deltaX, limit, limitError);
+        let routeY = determinateRouting(deltaY, limit, limitError);
+        let route = "";
+
+        if (routeX == 0 && routeY == 1) route = "n";
+        else if (routeX == 0 && routeY == -1) route = "s";
+        else if (routeX == 1 && routeY == 0) route = "w";
+        else if (routeX == -1 && routeY == 0) route = "e";
+        else if (routeX == 1 && routeY == 1) route = "nw";
+        else if (routeX == 1 && routeY == -1) route = "sw";
+        else if (routeX == -1 && routeY == 1) route = "ne";
+        else if (routeX == -1 && routeY == -1) route = "se";
+
+        this.route = route;
+        this.routeX = routeX;
+        this.routeY = routeY;
+        this.deltaX = deltaX;
+        this.deltaY = deltaY;
+
+        if (route != "") {
+          this.mouseDown.event = event;
+          let preFunc = this.mouseDown.preFunc[
+            this.mouseDown.preFunc.length - 1
+          ];
+
+          let objFunc = {
+            route,
+            counte: 0,
+            routeX,
+            routeY,
+            deltaX,
+            deltaY
+          };
+
+          // if (preFunc == undefined || preFunc.route != route) {
+          //   this.mouseDown.preFunc = [];
+          //   this.mouseDown.preFunc.push(objFunc);
+          // } else if (preFunc.counte >= maxCount) {
+          //   let func = this.mouseDown.func[this.mouseDown.func.length - 1];
+          //   if (func == undefined || func.route != preFunc.route) {
+          //     this.mouseDown.func.push(objFunc);
+          //     this.routeP = new String(route);
+          //   }
+          // } else preFunc.counte++;
+
+          if (preFunc == undefined || preFunc.route != route) {
+            this.mouseDown.preFunc = [];
+            this.mouseDown.preFunc.push(objFunc);
+          } else if (preFunc.counte >= maxCount) {
+            let func = this.mouseDown.func[this.mouseDown.func.length - 1];
+            if (func == undefined || func != preFunc.route) {
+              this.mouseDown.func.push(route);
+              this.routeP = new String(route);
+            }
+          } else preFunc.counte++;
+        }
+      }
+    },
+    eventMouseUp: function(event) {
+      let way = this.mouseDown.func.join();
+      let wayFunc = this.wayFuncs[way];
+
+      if (wayFunc) {
+        //debugger;
+        wayFunc(this, event);
+      }
+
+      console.log(this.mouseDown.func.join());
+      this.mouseDown.down = false;
+      this.mouseDown.event = undefined;
+      this.mouseDown.func = [];
     }
   }
 };
@@ -127,8 +248,7 @@ let board = Vue.component("savedTimes", {
   },
   methods: {
     dellSavedTime: function(event, id) {
-
-      this.data.itemsSavedTime = this.data.itemsSavedTime.filter((el) => {
+      this.data.itemsSavedTime = this.data.itemsSavedTime.filter(el => {
         return el.id != id;
       });
     }
@@ -138,10 +258,15 @@ let board = Vue.component("savedTimes", {
       type: Number,
       default: 0
     }
-  },
+  }
 });
 
 let data = { itemsSavedTime: [] };
+let wayFuncs = {
+  "s,n": startStopWatch,
+  "e,w": saveTime,
+  "s,w": clearStopWatch,
+};
 
 function saveTime(obj, e) {
   if (!!obj.timerId) {
@@ -167,18 +292,18 @@ function clearStopWatch(obj, e) {
 
 function startStopWatch(obj, e) {
   let buttonRunText = {
-    run: "Опаньки, куда так быстро?",
-    pause: "Опаньки, куда так быстро?"
+    run: "СТОП",
+    pause: "СТОП"
   };
 
   if (!obj.timerId) {
     obj.startTime = 0;
-    obj.buttonRunName = "Опаньки, куда так быстро?";
+    obj.buttonRunName = "СТОП";
     timer(obj);
   } else {
     obj.stopwatch = obj.additionaTime + (new Date() - obj.startTime) / 1000;
     obj.additionaTime = obj.stopwatch;
-    obj.buttonRunName = "Ну что, понеслись!";
+    obj.buttonRunName = "СТАРТ";
     obj.startTime = 0;
     clearTimeout(obj.timerId);
     obj.timerId = 0;
