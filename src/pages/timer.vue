@@ -155,8 +155,8 @@ export default {
       if (event.buttons === 1) {
         event.preventDefault();
         let limit = 20;
-        let limitError = 0.25;
-        let maxCount = 2;
+        let limitError = 0.35;
+        let maxCount = 3;
 
         let deltaX = this.mouseDown.event.screenX - event.screenX;
         let deltaY = this.mouseDown.event.screenY - event.screenY;
@@ -181,9 +181,6 @@ export default {
 
         if (route != "") {
           this.mouseDown.event = event;
-          let preFunc = this.mouseDown.preFunc[
-            this.mouseDown.preFunc.length - 1
-          ];
 
           let objFunc = {
             route,
@@ -205,16 +202,34 @@ export default {
           //   }
           // } else preFunc.counte++;
 
-          if (preFunc == undefined || preFunc.route != route) {
-            this.mouseDown.preFunc = [];
-            this.mouseDown.preFunc.push(objFunc);
-          } else if (preFunc.counte >= maxCount) {
+          // if (preFunc == undefined || preFunc.route != route) {
+          //   this.mouseDown.preFunc = [];
+          //   this.mouseDown.preFunc.push(objFunc);
+          // } else if (preFunc.counte >= maxCount) {
+          //   let func = this.mouseDown.func[this.mouseDown.func.length - 1];
+          //   if (func == undefined || func != preFunc.route) {
+          //     this.mouseDown.func.push(route);
+          //     this.routeP = new String(route);
+          //   }
+          // } else preFunc.counte++;
+
+          this.mouseDown.preFunc = this.mouseDown.preFunc.slice(-maxCount+1);
+          this.mouseDown.preFunc.push(route);
+          let countRoute = 0;
+          for (let i = 0; i < this.mouseDown.preFunc.length; i++) {
+            if ((this.mouseDown.preFunc[i] = route)) countRoute++;
+
+            if (countRoute >= maxCount) break;
+          }
+
+          if (countRoute >= maxCount) {
             let func = this.mouseDown.func[this.mouseDown.func.length - 1];
-            if (func == undefined || func != preFunc.route) {
+            if (func == undefined || func != route) {
+              this.mouseDown.preFunc = [];
               this.mouseDown.func.push(route);
               this.routeP = new String(route);
             }
-          } else preFunc.counte++;
+          }
         }
       }
     },
@@ -265,7 +280,7 @@ let data = { itemsSavedTime: [] };
 let wayFuncs = {
   "s,n": startStopWatch,
   "e,w": saveTime,
-  "s,w": clearStopWatch,
+  "s,w": clearStopWatch
 };
 
 function saveTime(obj, e) {
