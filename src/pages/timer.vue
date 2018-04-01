@@ -1,5 +1,6 @@
 <template>
   <main-layout>
+    
     <h2>ВНИМАНИЕ, ДОБАВЛЕНА ВОЗМОЖНОСТЬ УПРАВЛЕНИЯ ЖЕСТАМИ!</h2>
     <p>Жесты должны быть четкими, сложный анализ погрешности не вводил</p>
     <p>Жест "Вниз-Вверх": старт или стоп</p>
@@ -10,6 +11,7 @@
     v-on:mouseup.left="eventMouseUp($event)"
     v-on:mousemove="eventMouseMove($event)"
     >
+    <canvas id='canvas'></canvas>
      <div id="stopwatch">
         <input v-bind:value=buttonRunName id="button-run" type="button" class="myButton" v-on:click="start($event)">
         <input type="button" value="Сохранить время" class="myButton" v-on:click="saveTime($event)" id="saveTimeBtn">
@@ -123,7 +125,11 @@ export default {
         func: [],
         preFunc: []
       },
-      data
+      data,
+      body: {
+        canvas: document.getElementById("canvas"),
+        paintStarted: false
+      }
     };
   },
   components: {
@@ -153,6 +159,7 @@ export default {
       }
 
       if (event.buttons === 1) {
+        this.mouseDown.event = this.mouseDown.event || event;
         event.preventDefault();
         let limit = 20;
         let limitError = 0.35;
@@ -180,6 +187,28 @@ export default {
         this.deltaY = deltaY;
 
         if (route != "") {
+
+          if (!this.body.paintStarted) {
+            //debugger;
+
+            console.log('Begin');
+            //debugger;
+            this.body.paintStarted = true;
+            this.body.canvas = document.getElementById("canvas");
+            this.body.ctx = this.body.canvas.getContext('2d');
+        
+            this.body.ctx.lineWidth = 3;
+            this.body.ctx.strokeStyle = 'rgb(255, 220, 220)';
+            this.body.ctx.beginPath();
+            this.body.ctx.moveTo(event.screenX - this.body.canvas.offsetLeft, event.screenY - this.body.canvas.offsetTop-130);
+            
+            
+          }
+          
+          //debugger;
+          this.body.ctx.lineTo(event.screenX - this.body.canvas.offsetLeft, event.screenY - this.body.canvas.offsetTop-130);
+          this.body.ctx.stroke();
+
           this.mouseDown.event = event;
 
           let objFunc = {
@@ -237,6 +266,8 @@ export default {
       let way = this.mouseDown.func.join();
       let wayFunc = this.wayFuncs[way];
 
+      this.body.paintStarted = false;
+
       if (wayFunc) {
         //debugger;
         wayFunc(this, event);
@@ -246,6 +277,8 @@ export default {
       this.mouseDown.down = false;
       this.mouseDown.event = undefined;
       this.mouseDown.func = [];
+
+      this.body.ctx.clearRect(0,0,this.body.canvas.width,this.body.canvas.height);
     }
   }
 };
