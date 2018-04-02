@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 # Vue 2.0 Simple Routing Example!
-=======
 # My Vue 2.0 Simple Routing Example
->>>>>>> 90d80351a392c2edbd59a319d6a0bb754043b3f5
 
 > A simple example of routing with Vue 2.0 without using vue-router. This branch uses the raw HTML5 History API. For an example integrating a 3rd-party routing solution, see the [pagejs branch](https://github.com/chrisvfritz/vue-2.0-simple-routing-example/tree/pagejs).
 
