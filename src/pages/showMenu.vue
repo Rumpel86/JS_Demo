@@ -88,7 +88,7 @@ function closePopup(item) {
   } else this.showMenu = false;
 }
 
-// register popupMenu component!
+// register popupMenu component
 let popupMenu = Vue.component("popupMenu", {
   template: `
       <transition name="popupMenu" v-if=showMenu>
