@@ -202,7 +202,6 @@ export default {
             this.body.ctx.beginPath();
             this.body.ctx.moveTo(event.screenX - this.body.canvas.offsetLeft, event.screenY - this.body.canvas.offsetTop-130);
             
-            
           }
           
           //debugger;

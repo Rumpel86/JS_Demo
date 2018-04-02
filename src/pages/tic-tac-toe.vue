@@ -7,7 +7,6 @@
   </main-layout>
 </template>
 
-<!-- template for the popupMenu component -->
 <style>
 .popupMenu-mask {
   position: absolute;
